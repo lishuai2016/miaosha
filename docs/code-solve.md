@@ -73,7 +73,7 @@
 #### [为什么threadlocal存储user对象，原理]()
     1.并发编程中重要的问题就是数据共享，当你在一个线程中改变任意属性时，所有的线程都会因此受到影响，同时会看到第一个线程修改后的值<br>
     有时我们希望如此，比如：多个线程增大或减小同一个计数器变量<br>
-    但是，有时我们希望确保每个线程，只能工作在它自己的线程实例的拷贝上，同时不会影响其他线程的数据<br>
+    但是，有时我们希望确保每个线程，只能工作在它自己 的线程实例的拷贝上，同时不会影响其他线程的数据<br>
     
     举例： 举个例子，想象你在开发一个电子商务应用，你需要为每一个控制器处理的顾客请求，生成一个唯一的事务ID，同时将其传到管理器或DAO的业务方法中，
     以便记录日志。一种方案是将事务ID作为一个参数，传到所有的业务方法中。但这并不是一个好的方案，它会使代码变得冗余。   
@@ -130,12 +130,49 @@
      例如： 1. where 子句中对字段进行 null 值判断 . 
            2. 应尽量避免在 where 子句中使用!=或<>操作符 
            3. 应尽量避免在 where 子句中使用 or 来连接条件
-           4. in 和 not in 也要慎用，否则会导致全表扫描
+           4. in 和 not in 也要慎用，否则会导致全表扫描( 如果索引 会优先走索引 不会导致全表扫描 
+            字段上建了索引后，使用in不会全表扫描，而用not in 会全表扫描 低版本的mysql是两种情况都会全表扫描。
+            5.5版本后以修。而且在优化大表连接查询的时候，有一个方法就是将join操作拆分为in查询)
            5. select id from t where name like '%abc%' 或者
-           6 .select id from t where name like '%abc' 或者
-           7 . 若要提高效率，可以考虑全文检索。 
-           8 .而select id from t where name like 'abc%' 才用到索引 慢查询一般在测试环境不容易复现
-           9 .应尽量避免在 where 子句中对字段进行表达式操作 where num/2  num=100*2
+           6.select id from t where name like '%abc' 或者
+           7. 若要提高效率，可以考虑全文检索。 
+           8.而select id from t where name like 'abc%' 才用到索引 慢查询一般在测试环境不容易复现
+           9.应尽量避免在 where 子句中对字段进行表达式操作 where num/2  num=100*2
      2.合理的使用索引  索引并不是越多越好，使用不当会造成性能开销
      3.尽量避免大事务操作，提高系统并发能力
      4.尽量避免象客户端返回大量数据，如果返回则要考虑是否需求合理，实在不得已则需要在设计一波了！！！！！
+  
+#### [网站访问统计实现]()
+
+   ![整体流程](https://raw.githubusercontent.com/qiurunze123/imageall/master/count.png)
+   
+    利用lua脚本进行对redis操作,登陆时，每次登陆成功则记录访问（具体你想在什么时段进行统计自己说了算）
+    
+#### [项目进行dubbo+ZK改造]()
+    
+     ├── miaosha-admin  登录模块
+     │   ├── pom.xml
+     │   └── miaosha-admin-api
+     │   └── miaosha-admin-service
+     │   └── miaosha-admin-web
+     │   └── miaosha-common
+     │   
+     │   
+     
+     ├── miaosha-order   订单秒杀模块
+          │   ├── pom.xml
+          │   └── miaosha-order-api
+          │   └── miaosha-order-service
+          │   └── miaosha-order-web
+          │   └── miaosha-order-common
+          │   
+          │   
+     
+     ├── miaosha-message   消息模块
+          │   ├── pom.xml
+          │   └── miaosha-message-api
+          │   └── miaosha-message-service
+          │   └── miaosha-message-web
+          │   └── miaosha-message-common
+          │   
+          │  

@@ -1,14 +1,18 @@
 package com.geekq.miaosha.service;
 
+import com.geekq.miaosha.common.SnowflakeIdWorker;
+import com.geekq.miaosha.common.enums.MessageStatus;
 import com.geekq.miaosha.controller.RegisterController;
 import com.geekq.miaosha.dao.MiaoShaUserDao;
 import com.geekq.miaosha.domain.MiaoshaUser;
 import com.geekq.miaosha.exception.GlobleException;
+import com.geekq.miaosha.rabbitmq.MQSender;
 import com.geekq.miaosha.redis.MiaoShaUserKey;
 import com.geekq.miaosha.redis.RedisService;
 import com.geekq.miaosha.utils.MD5Utils;
 import com.geekq.miaosha.utils.UUIDUtil;
 import com.geekq.miaosha.vo.LoginVo;
+import com.geekq.miaosha.vo.MiaoShaMessageVo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +37,9 @@ public class MiaoShaUserService {
 
     @Autowired
     private RedisService redisService ;
+
+    @Autowired
+    private MQSender sender ;
 
 
     public MiaoshaUser getByToken(HttpServletResponse response , String token) {
@@ -93,7 +100,7 @@ public class MiaoShaUserService {
         miaoShaUser.setNickname(userName);
         try {
             miaoShaUserDao.insertMiaoShaUser(miaoShaUser);
-            MiaoshaUser user = miaoShaUserDao.getById(miaoShaUser.getId());
+            MiaoshaUser user = miaoShaUserDao.getByNickname(miaoShaUser.getNickname());
             if(user == null){
                 return false;
             }
@@ -106,6 +113,7 @@ public class MiaoShaUserService {
         }
         return true;
     }
+
     public boolean login(HttpServletResponse response , LoginVo loginVo) {
         if(loginVo ==null){
             throw  new GlobleException(SYSTEM_ERROR);
